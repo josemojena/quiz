@@ -1,18 +1,16 @@
 package main
 
 import (
-	"os"
-	"log"
 	"bufio"
-	"strings"
-	"strconv"
 	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func main() {
-
-
-
 
 	question := make([]string, 0)
 	answer := make([]int, 0)
@@ -40,18 +38,29 @@ func main() {
 
 	totalQuestion := len(question)
 	correctAnswer := 0
+    monitor := make(chan bool)
+	go func(question []string) {
+		for i := 0; i < len(question); i++ {
+			var value int
+			fmt.Println(question[i])
+			fmt.Scanln(&value)
 
-	for i:= 0; i< len(question) ; i++  {
-		var value  int
-		fmt.Println(question[i])
-		fmt.Scanln(&value)
-
-		if value == answer[i] {
-			correctAnswer ++
+			if value == answer[i] {
+				correctAnswer++
+			}
 		}
-	}
-	fmt.Printf("Total questions: %d\n", totalQuestion)
-	fmt.Printf("Correct answer: %d\n" , correctAnswer)
+		monitor <- true
+	}(question)
 
+	select {
+    case <- monitor:
+    	break
+	case <-time.After(30 * time.Second):
+		fmt.Println("Time over")
+		break
+	}
+	//close(doing)
+	fmt.Printf("Total questions: %d\n", totalQuestion)
+	fmt.Printf("Correct answer: %d\n", correctAnswer)
 
 }
